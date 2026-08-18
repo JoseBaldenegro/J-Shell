@@ -1,0 +1,36 @@
+#!/bin/bash
+
+LIMITE_MB=100        # Limite de memoria en MB por proceso
+INTERVALO=5          # Actualizar cada 5 segundos
+
+ROJO='\033[0;31m'
+VERDE='\033[0;32m'
+RESET='\033[0m'
+
+while true; do
+    clear
+    echo "Monitoreando uso de memoria por proceso (actualiza cada $INTERVALO seg)"
+    echo "Alerta si algun proceso supera $LIMITE_MB MB"
+    echo "--------------------------------------------"
+    echo "PID:NOMBRE:RSS(MB):ALERTA"
+
+    # Leer procesos del sistema
+    ps -eo pid,comm,rss --sort=-rss | tail -n +2 | while read pid comm rss; do
+        # Convertir KB a MB
+        rss_mb=$((rss / 1024))
+
+        # Definir color y alerta
+        if [ "$rss_mb" -ge "$LIMITE_MB" ]; then
+            color=$ROJO
+            alerta="ALTO USO"
+        else
+            color=$VERDE
+            alerta=""
+        fi
+
+        # Imprimir linea con color aplicado
+        echo -e "$pid:$comm:${color}${rss_mb}${RESET}:$alerta"
+    done
+
+    sleep "$INTERVALO"
+done

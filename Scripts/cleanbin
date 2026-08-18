@@ -1,0 +1,30 @@
+#!/bin/bash
+
+DIRECTORIO="$HOME"
+DIAS=30
+LOG="$HOME/limpieza_archivos.log"
+
+#Buscar y mostrar archivos que superen 30 dias
+archivos=$(find "$DIRECTORIO" -type f \( -iname "*.tmp" \) -mtime +$DIAS)
+if [ -z "$archivos" ]; then
+        echo "NO SE ENCONTRARON ARCHIVOS"
+else
+        echo
+        echo "SE ENCONTRARON LOS SIGUIENTES ARCHIVOS:"
+        echo "$archivos"
+        echo
+
+        #Usuario confirma
+        read -p "Desea eliminarlos? (s/n): " confirmacion
+        if [[ "$confirmacion" =~ ^[sS]$ ]]; then
+                echo "[$(date)] Archivos eliminados:" >> "$LOG"
+                echo "$archivos" | while read archivo; do
+                        echo " - $archivo" >> "$LOG"
+                        rm -f "$archivo"
+                done
+                echo "Archivos eliminados correctamente"
+                echo "Registro guardado en $LOG"
+        else
+                echo "Operacion cancelada"
+        fi
+fi
